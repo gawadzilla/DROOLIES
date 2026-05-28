@@ -34,7 +34,7 @@
   #intro {
     position: fixed;
     inset: 0;
-    background: #FFFFFF;
+    background: url('images/logo+entry/background.jpeg') no-repeat center center / cover;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -62,8 +62,10 @@
     position: absolute;
     left: 0; right: 0;
     width: 100%;
+    height: min(230px, 32vh);
     pointer-events: none;
     z-index: 1;
+    filter: drop-shadow(0px 6px 14px rgba(100, 0, 35, 0.45));
   }
   .intro-drip-top    { top: 0; }
   .intro-drip-bottom { bottom: 0; transform: rotate(180deg); }
@@ -910,54 +912,6 @@
 <!-- ===== INTRO ===== -->
 <div id="intro">
 
-  <!-- Drooling top band -->
-  <svg class="intro-drip-top" viewBox="0 0 1000 110" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="dripGradTop" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%"   stop-color="#FF6BA8"/>
-        <stop offset="50%"  stop-color="#E8165A"/>
-        <stop offset="100%" stop-color="#C4004A"/>
-      </linearGradient>
-    </defs>
-    <path fill="url(#dripGradTop)" d="
-      M0,0 L1000,0 L1000,62
-      C970,62 960,92 940,92 C920,92 910,62 890,62
-      C870,62 860,98 840,98 C820,98 810,62 790,62
-      C770,62 760,88 740,88 C720,88 710,62 690,62
-      C670,62 660,100 640,100 C620,100 610,62 590,62
-      C570,62 560,90 540,90 C520,90 510,62 490,62
-      C470,62 460,96 440,96 C420,96 410,62 390,62
-      C370,62 360,86 340,86 C320,86 310,62 290,62
-      C270,62 260,94 240,94 C220,94 210,62 190,62
-      C170,62 160,88 140,88 C120,88 110,62 90,62
-      C70,62 60,96 40,96 C20,96 10,62 0,68
-      Z"/>
-  </svg>
-
-  <!-- Drooling bottom band -->
-  <svg class="intro-drip-bottom" viewBox="0 0 1000 110" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="dripGradBot" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%"   stop-color="#C4004A"/>
-        <stop offset="50%"  stop-color="#E8165A"/>
-        <stop offset="100%" stop-color="#FF6BA8"/>
-      </linearGradient>
-    </defs>
-    <path fill="url(#dripGradBot)" d="
-      M0,0 L1000,0 L1000,62
-      C970,62 960,92 940,92 C920,92 910,62 890,62
-      C870,62 860,98 840,98 C820,98 810,62 790,62
-      C770,62 760,88 740,88 C720,88 710,62 690,62
-      C670,62 660,100 640,100 C620,100 610,62 590,62
-      C570,62 560,90 540,90 C520,90 510,62 490,62
-      C470,62 460,96 440,96 C420,96 410,62 390,62
-      C370,62 360,86 340,86 C320,86 310,62 290,62
-      C270,62 260,94 240,94 C220,94 210,62 190,62
-      C170,62 160,88 140,88 C120,88 110,62 90,62
-      C70,62 60,96 40,96 C20,96 10,62 0,68
-      Z"/>
-  </svg>
-
   <!-- Ambient floating particles -->
   <div class="intro-particles" aria-hidden="true">
     <span class="particle" style="--dur:4.4s;--del:0s;   width:13px;height:13px;top:13%;left:9%"></span>
@@ -999,7 +953,6 @@
     <div class="header-glow" aria-hidden="true"></div>
     <div class="header-content">
       <img class="header-logo-img" src="images/logo+entry/droolies_logo_transparent.png" alt="Droolies">
-      <div class="header-sub">Pancakes &nbsp;·&nbsp; Crêpes &nbsp;·&nbsp; Waffles &nbsp;·&nbsp; Cups</div>
     </div>
   </div>
 
@@ -1375,7 +1328,7 @@
 
       <!-- Welcome -->
       <div class="footer-welcome">Welcome to Droolies! 🍓</div>
-      <div class="footer-thanks">Thank you for visiting — see you again soon 💕</div>
+      <div class="footer-thanks">Your daily dose of satisfaction💕</div>
 
       <!-- Phone -->
       <a class="footer-phone" href="tel:+96100000000">
