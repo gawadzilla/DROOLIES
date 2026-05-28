@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Droolies Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --pink: #E8165A;
+    --pink-light: #FF6B9D;
+    --pink-pale: #FFE0EC;
+    --pink-bg: #FFF0F5;
+    --brown: #3D1A0E;
+    --cream: #FFF8F0;
+    --chocolate: #5C2D0A;
+    --white: #FFFAF8;
+    --shadow-pink: rgba(232, 22, 90, 0.25);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--pink-bg);
+    color: var(--brown);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ========== INTRO ========== */
+  #intro {
+    position: fixed;
+    inset: 0;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    overflow: hidden;
+    /* Cinematic exit: scale + blur + fade */
+    transition:
+      opacity   1s   cubic-bezier(0.4, 0, 0.2, 1),
+      transform 1s   cubic-bezier(0.4, 0, 0.2, 1),
+      filter    1s   cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 1s;
+  }
+  #intro.hidden {
+    opacity: 0;
+    transform: scale(1.06);
+    filter: blur(5px);
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* Pink header band — top */
+  #intro::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 110px;
+    background: linear-gradient(135deg, #FF6BA8 0%, #E8165A 50%, #C4004A 100%);
+    clip-path: polygon(0 0,100% 0,100% 55%,97% 75%,94% 55%,91% 85%,88% 55%,85% 90%,82% 55%,79% 80%,76% 50%,73% 85%,70% 55%,67% 75%,64% 50%,61% 80%,58% 55%,55% 88%,52% 55%,49% 78%,46% 55%,43% 85%,40% 55%,37% 75%,34% 55%,31% 82%,28% 55%,25% 78%,22% 55%,19% 80%,16% 55%,13% 86%,10% 55%,7% 75%,4% 55%,0 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  /* Pink footer band — bottom */
+  #intro::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 110px;
+    background: linear-gradient(135deg, #C4004A 0%, #E8165A 50%, #FF6BA8 100%);
+    clip-path: polygon(0 45%,3% 25%,6% 45%,9% 15%,12% 45%,15% 22%,18% 45%,21% 18%,24% 45%,27% 28%,30% 45%,33% 20%,36% 45%,39% 25%,42% 45%,45% 18%,48% 45%,51% 22%,54% 45%,57% 20%,60% 45%,63% 25%,66% 45%,69% 18%,72% 45%,75% 28%,78% 45%,81% 20%,84% 45%,87% 22%,90% 45%,93% 18%,96% 45%,100% 30%,100% 100%,0 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── Ambient floating particles ── */
+  .intro-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(232,22,90,0.12);
+    animation: particle-drift var(--dur, 5s) ease-in-out infinite var(--del, 0s);
+    will-change: transform, opacity;
+  }
+  @keyframes particle-drift {
+    0%,100% { transform: translateY(0)     scale(1);    opacity: 0.18; }
+    38%      { transform: translateY(-24px) scale(1.12); opacity: 0.42; }
+    72%      { transform: translateY(-10px) scale(0.94); opacity: 0.26; }
+  }
+
+  /* ── Ambient radial glow behind logo (opacity + scale = GPU-only) ── */
+  .intro-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -55%);
+    width: min(520px, 105vw);
+    height: min(360px, 72vw);
+    background: radial-gradient(ellipse at center,
+      rgba(232,22,90,0.07) 0%,
+      rgba(255,100,157,0.04) 45%,
+      transparent 72%);
+    border-radius: 50%;
+    opacity: 0;
+    animation: glow-breathe 3s ease-in-out infinite 1.2s;
+    pointer-events: none;
+    z-index: 1;
+    will-change: transform, opacity;
+  }
+  @keyframes glow-breathe {
+    0%   { opacity: 0;   transform: translate(-50%,-55%) scale(0.88); }
+    45%  { opacity: 1;   transform: translate(-50%,-55%) scale(1.02); }
+    100% { opacity: 0.5; transform: translate(-50%,-55%) scale(1.10); }
+  }
+
+  /* ── Full-screen shimmer sweep (fires once after logo is visible) ── */
+  .intro-shimmer {
+    position: absolute;
+    inset: -10%;
+    background: linear-gradient(
+      108deg,
+      transparent 22%,
+      rgba(232,22,90,0.07) 50%,
+      transparent 78%
+    );
+    transform: translateX(-180%) skewX(-18deg);
+    animation: shimmer-sweep 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.55s forwards;
+    pointer-events: none;
+    z-index: 2;
+    will-change: transform;
+  }
+  @keyframes shimmer-sweep {
+    from { transform: translateX(-180%) skewX(-18deg); }
+    to   { transform: translateX(280%)  skewX(-18deg); }
+  }
+
+  /* ── Content wrapper ── */
+  .intro-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── Intro video ── */
+  .intro-logo {
+    display: block;
+    width: min(340px, 80vw);
+    height: auto;
+    border-radius: 20px;
+    user-select: none;
+    -webkit-user-select: none;
+    mix-blend-mode: multiply;
+    animation: logo-spring 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+    will-change: transform, opacity;
+  }
+  @keyframes logo-spring {
+    0%  { opacity: 0; transform: scale(0.88) translateY(24px); }
+    60% { opacity: 1; }
+    100%{ opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* ── Tagline: expands letter-spacing into place ── */
+  .intro-tagline {
+    margin-top: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 4.5px;
+    text-transform: uppercase;
+    color: var(--pink);
+    text-shadow: 0 1px 8px rgba(232,22,90,0.18);
+    white-space: nowrap;
+    animation: tagline-expand 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.62s both;
+    will-change: transform, opacity;
+  }
+  @keyframes tagline-expand {
+    from { opacity: 0; transform: translateY(10px); letter-spacing: 10px; }
+    to   { opacity: 1; transform: translateY(0);    letter-spacing: 4.5px; }
+  }
+
+  /* ── Progress pill: shows time until menu opens ── */
+  .intro-progress {
+    position: absolute;
+    bottom: 48px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 56px;
+    height: 3px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 4px;
+    overflow: hidden;
+    z-index: 4;
+    opacity: 0;
+    animation: progress-appear 0.5s ease 1.9s forwards;
+  }
+  .intro-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.55), rgba(255,255,255,0.95));
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(255,255,255,0.85);
+    animation: progress-fill 2.1s cubic-bezier(0.4, 0, 0.2, 1) 1.9s forwards;
+    will-change: width;
+  }
+  @keyframes progress-appear { to { opacity: 1; } }
+  @keyframes progress-fill   { from { width: 0%; } to { width: 100%; } }
+
+
+  /* ========== MAIN MENU ========== */
+  #menu { display: none; }
+  #menu.visible { display: block; }
+
+  /* Header */
+  .menu-header {
+    background: linear-gradient(155deg, #FF4D8D 0%, #E8165A 38%, #C4004A 68%, #8B0034 100%);
+    padding: 36px 20px 34px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Scalloped bottom */
+  .menu-header::before {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 32px;
+    background: var(--pink-bg);
+    clip-path: ellipse(55% 100% at 50% 100%);
+    z-index: 2;
+  }
+  /* Repeating shine sweep */
+  .menu-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(108deg, transparent 28%, rgba(255,255,255,0.10) 50%, transparent 72%);
+    animation: header-shine 7s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+  @keyframes header-shine {
+    0%, 100% { transform: translateX(-160%); }
+    50% { transform: translateX(160%); }
+  }
+  /* Radial glow bloom behind logo */
+  .header-glow {
+    position: absolute;
+    top: 48%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 340px; height: 220px;
+    background: radial-gradient(ellipse, rgba(255,190,220,0.40) 0%, rgba(255,100,157,0.12) 55%, transparent 72%);
+    pointer-events: none;
+    z-index: 0;
+    animation: header-glow-breathe 4s ease-in-out infinite;
+  }
+  @keyframes header-glow-breathe {
+    0%,100% { opacity: 0.8; transform: translate(-50%,-50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%,-50%) scale(1.08); }
+  }
+  .header-content {
+    position: relative;
+    z-index: 2;
+  }
+  .header-logo-img {
+    width: 210px;
+    max-width: 72vw;
+    height: auto;
+    display: block;
+    margin: 0 auto 10px;
+    filter:
+      drop-shadow(0 6px 24px rgba(0,0,0,0.28))
+      drop-shadow(0 2px 6px rgba(0,0,0,0.18))
+      drop-shadow(0 0 40px rgba(255,160,200,0.35));
+    animation: header-logo-float 4.5s ease-in-out infinite;
+  }
+  @keyframes header-logo-float {
+    0%,100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+  }
+  .header-sub {
+    color: rgba(255,255,255,0.88);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 4.5px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.22);
+  }
+
+  /* Sticky Nav */
+  .cat-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    box-shadow: 0 2px 16px rgba(232,22,90,0.12);
+  }
+  .cat-nav::-webkit-scrollbar { display: none; }
+  .cat-pill {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--pink-pale);
+    color: var(--pink);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s;
+    white-space: nowrap;
+  }
+  .cat-pill.active, .cat-pill:hover {
+    background: var(--pink);
+    color: white;
+    border-color: var(--pink);
+    box-shadow: 0 4px 12px var(--shadow-pink);
+  }
+
+  /* Section */
+  .menu-section {
+    padding: 26px 16px 12px;
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid rgba(232,22,90,0.10);
+    position: relative;
+  }
+  /* Pink accent dot on section title */
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -1.5px;
+    left: 0;
+    width: 40px;
+    height: 1.5px;
+    background: var(--pink);
+    border-radius: 2px;
+  }
+  .section-title-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: 24px;
+    color: var(--pink);
+    letter-spacing: 0.2px;
+    line-height: 1;
+  }
+  .section-title-bar {
+    flex: 1;
+    height: 1.5px;
+    background: linear-gradient(90deg, rgba(232,22,90,0.20), transparent);
+    border-radius: 2px;
+  }
+  .section-emoji {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  /* Item Card — frosted glass */
+  .item-card {
+    background: rgba(255,255,255,0.86);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 18px;
+    padding: 14px 14px 14px 14px;
+    margin-bottom: 11px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow:
+      0 2px 14px rgba(232,22,90,0.09),
+      0 1px 3px rgba(0,0,0,0.04),
+      inset 0 1px 0 rgba(255,255,255,0.95);
+    border: 1px solid rgba(232,22,90,0.11);
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity  0.4s ease,
+      transform 0.4s ease,
+      box-shadow 0.28s ease,
+      border-color 0.28s ease;
+    will-change: transform, opacity;
+  }
+  .item-card.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .item-card:hover {
+    box-shadow:
+      0 8px 32px rgba(232,22,90,0.16),
+      0 2px 8px rgba(0,0,0,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.95);
+    border-color: rgba(232,22,90,0.22);
+  }
+  .item-card:active { transform: scale(0.988); }
+
+  /* Circular image — Instagram profile style */
+  .item-img-wrap {
+    flex-shrink: 0;
+    width: 78px;
+    height: 78px;
+    position: relative;
+  }
+  .item-img {
+    width: 78px;
+    height: 78px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    border: 2.5px solid rgba(232,22,90,0.18);
+    box-shadow:
+      0 4px 16px rgba(232,22,90,0.20),
+      0 1px 4px rgba(0,0,0,0.07);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform;
+  }
+  .item-img-placeholder {
+    width: 78px;
+    height: 78px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    border: 2.5px solid rgba(232,22,90,0.18);
+    box-shadow:
+      0 4px 16px rgba(232,22,90,0.20),
+      0 1px 4px rgba(0,0,0,0.07);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform;
+  }
+  /* Spring-scale on hover — the single image microinteraction */
+  .item-card:hover .item-img,
+  .item-card:hover .item-img-placeholder { transform: scale(1.07); }
+  /* Clickable cursor on images */
+  .item-img-placeholder, .item-img { cursor: pointer; }
+  /* Hide legacy floating shadow element */
+  .img-shadow { display: none; }
+
+  /* ── Instagram-style image reveal modal ── */
+  .img-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .img-modal.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .img-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .img-modal-ring {
+    position: relative;
+    z-index: 1;
+    padding: 3px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink-light), var(--pink), #C4004A);
+    transform: scale(0.25);
+    transition: transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  .img-modal.open .img-modal-ring {
+    transform: scale(1);
+  }
+  .img-modal-circle {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #fff;
+    background: #FFE0EC;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 110px;
+    line-height: 1;
+  }
+  .img-modal-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .img-modal-name {
+    position: relative;
+    z-index: 1;
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 20px;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    transform: translateY(10px);
+    opacity: 0;
+    transition: opacity 0.3s ease 0.18s, transform 0.3s ease 0.18s;
+  }
+  .img-modal.open .img-modal-name {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .img-modal-hint {
+    position: relative;
+    z-index: 1;
+    color: rgba(255,255,255,0.55);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: -10px;
+    transform: translateY(6px);
+    opacity: 0;
+    transition: opacity 0.3s ease 0.26s, transform 0.3s ease 0.26s;
+  }
+  .img-modal.open .img-modal-hint {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Item info */
+  .item-info { flex: 1; min-width: 0; }
+  .item-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 15.5px;
+    color: var(--brown);
+    line-height: 1.2;
+    margin-bottom: 3px;
+    letter-spacing: 0.1px;
+  }
+  .item-desc {
+    font-size: 11.5px;
+    color: #9D7282;
+    line-height: 1.45;
+    margin-bottom: 9px;
+    font-weight: 600;
+  }
+  .item-price {
+    font-family: 'Fredoka One', cursive;
+    font-size: 17px;
+    color: var(--pink);
+  }
+  .item-price-badge {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #FFE8F2 0%, #FFD0E6 100%);
+    color: var(--pink);
+    padding: 5px 13px;
+    border-radius: 50px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 13.5px;
+    border: 1px solid rgba(232,22,90,0.15);
+    letter-spacing: 0.2px;
+    box-shadow: 0 1px 4px rgba(232,22,90,0.11);
+  }
+
+  /* Size pricing table */
+  .size-table {
+    display: flex;
+    gap: 5px;
+    margin-top: 0;
+    flex-wrap: wrap;
+  }
+  .size-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(232,22,90,0.055);
+    border: 1px solid rgba(232,22,90,0.13);
+    border-radius: 9px;
+    padding: 5px 10px;
+    min-width: 54px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    cursor: default;
+  }
+  .size-badge:hover {
+    background: rgba(232,22,90,0.11);
+    border-color: rgba(232,22,90,0.28);
+  }
+  .size-label {
+    font-size: 8.5px;
+    font-weight: 800;
+    color: var(--pink);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    line-height: 1.3;
+  }
+  .size-price {
+    font-family: 'Fredoka One', cursive;
+    font-size: 12px;
+    color: var(--brown);
+    line-height: 1.3;
+  }
+
+  /* Add-ons section */
+  .addons-box {
+    background: rgba(255,255,255,0.84);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin: 0 0 18px;
+    border: 1px solid rgba(232,22,90,0.10);
+    box-shadow:
+      0 2px 14px rgba(232,22,90,0.07),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  .addons-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 14px;
+    color: var(--pink);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.2px;
+  }
+  .addon-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(232,22,90,0.07);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--brown);
+    transition: background 0.18s ease;
+  }
+  .addon-row:last-child { border-bottom: none; }
+  .addon-price {
+    margin-left: auto;
+    color: var(--pink);
+    font-family: 'Fredoka One', cursive;
+    font-size: 12.5px;
+  }
+  .addon-emoji { font-size: 17px; }
+
+  /* Special item */
+  .special-card {
+    background: linear-gradient(135deg, var(--pink) 0%, #C4004A 100%);
+    border-radius: 20px;
+    padding: 20px;
+    margin: 0 16px 20px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 8px 28px var(--shadow-pink);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .special-card.revealed { opacity: 1; transform: translateY(0); }
+  .special-card::before {
+    content: '✨';
+    position: absolute;
+    top: 10px; right: 14px;
+    font-size: 28px;
+    animation: sparkle 2s ease-in-out infinite;
+  }
+  @keyframes sparkle {
+    0%,100% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(20deg) scale(1.2); }
+  }
+  .special-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+  .special-desc { font-size: 13px; opacity: 0.9; margin-bottom: 12px; }
+  .special-flavors {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .flavor-tag {
+    background: rgba(255,255,255,0.25);
+    padding: 4px 14px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.4);
+  }
+  .special-price {
+    font-family: 'Fredoka One', cursive;
+    font-size: 32px;
+    display: block;
+  }
+
+  /* Pink sauce addon */
+  .sauce-addon {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.84);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin: 0 0 10px;
+    border: 1px solid rgba(232,22,90,0.14);
+    box-shadow: 0 2px 10px rgba(232,22,90,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  .sauce-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--pink);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .sauce-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 15px;
+    color: var(--brown);
+  }
+  .sauce-price {
+    margin-left: auto;
+    font-family: 'Fredoka One', cursive;
+    font-size: 15px;
+    color: var(--pink);
+  }
+
+  /* Footer */
+  .menu-footer {
+    background: linear-gradient(160deg, #E8165A 0%, #C4004A 60%, #8B0034 100%);
+    padding: 22px 20px 18px;
+    text-align: center;
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .menu-footer::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    height: 28px;
+    background: var(--pink-bg);
+    clip-path: ellipse(55% 100% at 50% 0%);
+    z-index: 1;
+  }
+  .footer-inner { position: relative; z-index: 2; padding-top: 8px; }
+
+  /* Find Us — compact inline row */
+  .location-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.14);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 14px;
+    padding: 10px 14px;
+    text-decoration: none;
+    margin-bottom: 16px;
+    transition: background 0.22s ease, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .location-card:hover { background: rgba(255,255,255,0.22); transform: translateY(-1px); }
+  .location-card:active { transform: scale(0.97); }
+  .location-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    animation: pin-bounce 2.4s ease-in-out infinite;
+  }
+  @keyframes pin-bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  .location-text { flex: 1; text-align: left; }
+  .location-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 15px;
+    color: white;
+    line-height: 1.2;
+  }
+  .location-hint {
+    font-size: 11px;
+    color: rgba(255,255,255,0.75);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .location-arrow {
+    font-size: 20px;
+    color: rgba(255,255,255,0.7);
+    flex-shrink: 0;
+    transition: transform 0.22s ease;
+  }
+  .location-card:hover .location-arrow { transform: translateX(3px); }
+
+  /* Phone */
+  .footer-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.13);
+    border: 1px solid rgba(255,255,255,0.24);
+    border-radius: 50px;
+    padding: 7px 16px;
+    text-decoration: none;
+    margin-bottom: 16px;
+    transition: background 0.22s ease;
+  }
+  .footer-phone:hover { background: rgba(255,255,255,0.22); }
+  .footer-phone-icon { font-size: 15px; }
+  .footer-phone-num {
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 0.5px;
+  }
+
+  /* Welcome / thanks */
+  .footer-welcome {
+    font-family: 'Fredoka One', cursive;
+    font-size: 20px;
+    color: white;
+    margin-bottom: 3px;
+  }
+  .footer-thanks {
+    font-size: 13px;
+    color: rgba(255,255,255,0.80);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .footer-hearts {
+    font-size: 18px;
+    margin-bottom: 18px;
+    display: block;
+    animation: heart-beat 1.5s ease-in-out infinite;
+  }
+  @keyframes heart-beat {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+  }
+
+  /* Powered by */
+  .footer-powered {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding-top: 12px;
+    margin-top: 2px;
+  }
+  .footer-powered span {
+    color: rgba(255,255,255,0.70);
+    font-weight: 800;
+  }
+
+  /* Drip section divider — gradient + refined clip */
+  .drip-divider {
+    position: relative;
+    width: 100%;
+    height: 32px;
+    margin-bottom: -1px;
+    overflow: hidden;
+  }
+  .drip-divider::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+      #C4004A 0%,
+      var(--pink) 30%,
+      #FF6B9D 52%,
+      var(--pink) 72%,
+      #C4004A 100%);
+    clip-path: polygon(
+      0 0, 100% 0, 100% 30%,
+      95% 82%, 90% 30%, 85% 100%, 80% 30%,
+      75% 72%, 70% 30%, 65% 62%, 60% 22%,
+      55% 72%, 50% 30%, 45% 82%, 40% 30%,
+      35% 62%, 30% 30%, 25% 72%, 20% 30%,
+      15% 52%, 10% 30%, 5% 62%, 0 30%
+    );
+  }
+
+  /* Scroll to top */
+  .scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    background: var(--pink);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px var(--shadow-pink);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99;
+    transition: transform 0.2s;
+  }
+  .scroll-top.visible { display: flex; }
+  .scroll-top:active { transform: scale(0.9); }
+</style>
+</head>
+<body>
+
+<!-- ===== INTRO ===== -->
+<div id="intro">
+
+  <!-- Ambient floating particles -->
+  <div class="intro-particles" aria-hidden="true">
+    <span class="particle" style="--dur:4.4s;--del:0s;   width:13px;height:13px;top:13%;left:9%"></span>
+    <span class="particle" style="--dur:5.8s;--del:-1.3s;width:7px; height:7px; top:26%;right:14%"></span>
+    <span class="particle" style="--dur:5.1s;--del:-2.1s;width:19px;height:19px;bottom:19%;left:15%"></span>
+    <span class="particle" style="--dur:3.9s;--del:-0.6s;width:10px;height:10px;bottom:27%;right:9%"></span>
+    <span class="particle" style="--dur:6.5s;--del:-1.9s;width:6px; height:6px; top:54%;left:5%"></span>
+    <span class="particle" style="--dur:4.7s;--del:-3.2s;width:15px;height:15px;top:37%;right:6%"></span>
+    <span class="particle" style="--dur:5.3s;--del:-0.9s;width:9px; height:9px; top:68%;right:21%"></span>
+    <span class="particle" style="--dur:7s;  --del:-2.5s;width:5px; height:5px; top:7%; right:34%"></span>
+  </div>
+
+  <!-- Ambient radial glow -->
+  <div class="intro-glow" aria-hidden="true"></div>
+
+  <!-- Full-screen shimmer (fires once after logo appears) -->
+  <div class="intro-shimmer" aria-hidden="true"></div>
+
+  <!-- Logo + tagline -->
+  <div class="intro-content">
+    <video class="intro-logo" id="introVideo"
+      src="images/logo+entry/Firefly i want it to start withidel then licking lips from left to right then wink then the whole lo.mp4"
+      autoplay muted playsinline></video>
+    <p class="intro-tagline">Pancakes &nbsp;·&nbsp; Crêpes &nbsp;·&nbsp; Waffles</p>
+  </div>
+
+  <!-- Thin progress indicator -->
+  <div class="intro-progress" aria-hidden="true">
+    <div class="intro-progress-fill"></div>
+  </div>
+
+</div>
+
+<!-- ===== MENU ===== -->
+<div id="menu">
+
+  <!-- Header -->
+  <div class="menu-header">
+    <div class="header-glow" aria-hidden="true"></div>
+    <div class="header-content">
+      <img class="header-logo-img" src="images/logo+entry/droolies_logo_transparent.png" alt="Droolies">
+      <div class="header-sub">Pancakes &nbsp;·&nbsp; Crêpes &nbsp;·&nbsp; Waffles &nbsp;·&nbsp; Cups</div>
+    </div>
+  </div>
+
+  <!-- Category Nav -->
+  <div class="cat-nav" id="catNav">
+    <div class="cat-pill active" onclick="scrollToSection('pancakes', this)">🥞 Pancakes</div>
+    <div class="cat-pill" onclick="scrollToSection('cups', this)">🍓 Strawberry Cups</div>
+    <div class="cat-pill" onclick="scrollToSection('crepes', this)">🫔 Crêpes</div>
+    <div class="cat-pill" onclick="scrollToSection('waffles', this)">🧇 Waffles</div>
+    <div class="cat-pill" onclick="scrollToSection('special', this)">⭐ Special</div>
+  </div>
+
+  <!-- ===== PANCAKES ===== -->
+  <div class="menu-section" id="pancakes">
+    <div class="section-title">
+      <span class="section-emoji">🥞</span>
+      <span class="section-title-text">Pancakes</span>
+      <div class="section-title-bar"></div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#FFE0EC,#FFB3D1);">🥞</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Dubai Drip Pancakes 👑</div>
+        <div class="item-desc">25 mini pancakes topped with chocolate, pistachio kunafah & strawberries</div>
+        <div class="item-price-badge">700,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#FFE0EC,#D4A0B0);">🍫</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Choco Cloud Pancakes 🍫</div>
+        <div class="item-desc">25 mini pancakes topped with brownies, chocolate & marshmallows</div>
+        <div class="item-price-badge">650,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#FFE0EC,#FF9EBB);">🍓</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Berry Bliss Minis 🍓</div>
+        <div class="item-desc">12 mini pancakes topped with chocolate & strawberries</div>
+        <div class="item-price-badge">450,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#E8F5E9,#C8E6C9);">🌿</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Pistachio Crush Minis 🌿</div>
+        <div class="item-desc">12 mini pancakes topped with chocolate, pistachio kunafah & strawberries</div>
+        <div class="item-price-badge">550,000 L.L</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STRAWBERRY CUPS ===== -->
+  <div class="drip-divider"></div>
+  <div class="menu-section" id="cups" style="background: white; padding-top:32px;">
+    <div class="section-title">
+      <span class="section-emoji">🍓</span>
+      <span class="section-title-text">Strawberry Cups</span>
+      <div class="section-title-bar"></div>
+    </div>
+
+    <!-- Classic Choco Berry Cup -->
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#FF8A80,#FF1744);">🍓</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Classic Choco Berry Cup 🍫</div>
+        <div class="item-desc">Fresh strawberries with chocolate</div>
+        <div class="size-table">
+          <div class="size-badge"><span class="size-label">Small</span><span class="size-price">450,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Medium</span><span class="size-price">550,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Large</span><span class="size-price">600,000 L.L</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#E8F5E9,#A5D6A7);">🌿</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Dubai Pistachio Cup 🌿</div>
+        <div class="item-desc">Fresh strawberries with pistachio kunafah & chocolate</div>
+        <div class="size-table">
+          <div class="size-badge"><span class="size-label">Small</span><span class="size-price">500,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Medium</span><span class="size-price">650,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Large</span><span class="size-price">700,000 L.L</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#D7CCC8,#8D6E63);">🍫</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Brownie Lava Cup 🍫</div>
+        <div class="item-desc">Fresh strawberries with brownies & chocolate</div>
+        <div class="size-table">
+          <div class="size-badge"><span class="size-label">Small</span><span class="size-price">450,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Medium</span><span class="size-price">550,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Large</span><span class="size-price">600,000 L.L</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#F8F8F8,#E0E0E0);">☁️</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Marshmallow Dream Cup ☁️</div>
+        <div class="item-desc">Fresh strawberries with marshmallows & chocolate</div>
+        <div class="size-table">
+          <div class="size-badge"><span class="size-label">Small</span><span class="size-price">450,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Medium</span><span class="size-price">550,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Large</span><span class="size-price">600,000 L.L</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#FFF9C4,#F9A825);">🌸</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Lotus Crunch Cup 🌸</div>
+        <div class="item-desc">Fresh strawberries with lotus & chocolate</div>
+        <div class="size-table">
+          <div class="size-badge"><span class="size-label">Small</span><span class="size-price">450,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Medium</span><span class="size-price">550,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Large</span><span class="size-price">600,000 L.L</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#F3E5F5,#CE93D8);">🖤</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Oreo Madness Cup 🖤</div>
+        <div class="item-desc">Fresh strawberries with Oreo & chocolate</div>
+        <div class="size-table">
+          <div class="size-badge"><span class="size-label">Small</span><span class="size-price">450,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Medium</span><span class="size-price">550,000 L.L</span></div>
+          <div class="size-badge"><span class="size-label">Large</span><span class="size-price">600,000 L.L</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pink Sauce Addon -->
+    <div class="sauce-addon">
+      <span style="font-size:24px">🩷</span>
+      <div>
+        <div class="sauce-label">Add On</div>
+        <div class="sauce-name">Droolies Pink Sauce</div>
+      </div>
+      <div class="sauce-price">100,000 L.L</div>
+    </div>
+  </div>
+
+  <!-- ===== CRÊPES ===== -->
+  <div class="drip-divider"></div>
+  <div class="menu-section" id="crepes" style="padding-top:32px;">
+    <div class="section-title">
+      <span class="section-emoji">🫔</span>
+      <span class="section-title-text">Crêpes</span>
+      <div class="section-title-bar"></div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#FFF8E1,#F9A825);">🍫</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Nutella Heaven Crêpe</div>
+        <div class="item-price-badge">540,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#E8F5E9,#66BB6A);">🌿</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Dubai Pistachio Crêpe</div>
+        <div class="item-price-badge">650,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#FFE0EC,#F06292);">🍬</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Kinder Melt Crêpe</div>
+        <div class="item-price-badge">540,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#F3E5F5,#BA68C8);">🤍</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">White Velvet Crêpe</div>
+        <div class="item-price-badge">450,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#D7CCC8,#4E342E);">🖤</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Dark Temptation Crêpe</div>
+        <div class="item-price-badge">450,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#FFF9C4,#FFA000);">🌸</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Lotus Lover Crêpe</div>
+        <div class="item-price-badge">450,000 L.L</div>
+      </div>
+    </div>
+
+    <!-- Pink Dream Special -->
+    <div class="special-card" style="margin: 0 0 16px;">
+      <div class="special-title">🩷 Pink Dream Crêpe</div>
+      <div class="special-desc">Osmaloyeh mixed with Droolies pink strawberry chocolate & Nutella</div>
+      <span class="special-price">650,000 L.L</span>
+    </div>
+
+    <!-- Crêpe Add-ons -->
+    <div class="addons-box" style="margin: 0 0 20px;">
+      <div class="addons-title">➕ Add Ons</div>
+      <div class="addon-row"><span class="addon-emoji">🍌</span> Banana <span class="addon-price">+100,000 L.L</span></div>
+      <div class="addon-row"><span class="addon-emoji">🍓</span> Strawberries <span class="addon-price">+100,000 L.L</span></div>
+      <div class="addon-row"><span class="addon-emoji">🍪</span> Oreo <span class="addon-price">+100,000 L.L</span></div>
+      <div class="addon-row"><span class="addon-emoji">🌸</span> Lotus <span class="addon-price">+100,000 L.L</span></div>
+      <div class="addon-row"><span class="addon-emoji">✨</span> Sprinkles <span class="addon-price">+100,000 L.L</span></div>
+    </div>
+  </div>
+
+  <!-- ===== WAFFLES ===== -->
+  <div class="drip-divider"></div>
+  <div class="menu-section" id="waffles" style="background: white; padding-top:32px;">
+    <div class="section-title">
+      <span class="section-emoji">🧇</span>
+      <span class="section-title-text">Waffles</span>
+      <div class="section-title-bar"></div>
+    </div>
+
+    <!-- ⭐ Our Special — pinned here for upsell -->
+    <div class="special-card" style="margin: 0 0 20px;">
+      <span class="section-emoji">⭐</span>
+      <span class="section-title-text" style="color: white;">Our Special</span>
+      <div class="special-title">🧇 Drooling Waffles Box</div>
+      <div class="special-desc">4 Waffle Sticks — 1 flavor for each</div>
+      <div class="special-flavors">
+        <span class="flavor-tag">🌿 Pistachio</span>
+        <span class="flavor-tag">🍫 Nutella</span>
+        <span class="flavor-tag">🤍 White Chocolate</span>
+        <span class="flavor-tag">🍬 Kinder</span>
+      </div>
+      <span class="special-price">750,000 L.L</span>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#FFF8E1,#F9A825);">🍫</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Nutella Bliss Waffle</div>
+        <div class="item-price-badge">500,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#E8F5E9,#66BB6A);">🌿</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Pistachio Royale Waffle</div>
+        <div class="item-price-badge">650,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#FFE0EC,#F06292);">🍬</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Kinder Crunch Waffle</div>
+        <div class="item-price-badge">500,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#F3E5F5,#CE93D8);">🤍</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">White Choco Waffle</div>
+        <div class="item-price-badge">450,000 L.L</div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-img-wrap">
+        <div class="item-img-placeholder" style="background: linear-gradient(135deg,#D7CCC8,#4E342E);">🖤</div>
+        <div class="img-shadow"></div>
+      </div>
+      <div class="item-info">
+        <div class="item-name">Dark Choco Waffle</div>
+        <div class="item-price-badge">450,000 L.L</div>
+      </div>
+    </div>
+
+    <!-- Waffle Add-ons -->
+    <div class="addons-box" style="margin: 0 0 20px;">
+      <div class="addons-title">➕ Add Ons</div>
+      <div class="addon-row"><span class="addon-emoji">🍌</span> Banana <span class="addon-price">+100,000 L.L</span></div>
+      <div class="addon-row"><span class="addon-emoji">🍓</span> Strawberries <span class="addon-price">+100,000 L.L</span></div>
+      <div class="addon-row"><span class="addon-emoji">🍪</span> Oreo <span class="addon-price">+100,000 L.L</span></div>
+      <div class="addon-row"><span class="addon-emoji">🌸</span> Lotus <span class="addon-price">+100,000 L.L</span></div>
+      <div class="addon-row"><span class="addon-emoji">✨</span> Sprinkles <span class="addon-price">+100,000 L.L</span></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="menu-footer">
+    <div class="footer-inner">
+
+      <!-- Welcome -->
+      <div class="footer-welcome">Welcome to Droolies! 🍓</div>
+      <div class="footer-thanks">Thank you for visiting — see you again soon 💕</div>
+
+      <!-- Phone -->
+      <a class="footer-phone" href="tel:+96100000000">
+        <span class="footer-phone-icon">📞</span>
+        <span class="footer-phone-num">+961 00 000 000</span>
+      </a>
+
+      <!-- Find Us -->
+      <a class="location-card" href="https://maps.app.goo.gl/9VNk5iw8NcYguHbj6?g_st=iw" target="_blank" rel="noopener">
+        <span class="location-icon">📍</span>
+        <div class="location-text">
+          <div class="location-title">Find Us</div>
+          <div class="location-hint">Tap to open in Google Maps →</div>
+        </div>
+        <span class="location-arrow">›</span>
+      </a>
+      <!-- Powered by -->
+      <div class="footer-powered">Powered by <span>Gawadzilla</span></div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Instagram-style image modal -->
+<div class="img-modal" id="imgModal" onclick="closeImgModal()">
+  <div class="img-modal-backdrop"></div>
+  <div class="img-modal-ring">
+    <div class="img-modal-circle" id="imgModalCircle"></div>
+  </div>
+  <div class="img-modal-name" id="imgModalName"></div>
+  <div class="img-modal-hint">Tap anywhere to close</div>
+</div>
+
+<!-- Scroll to top -->
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  // Tap anywhere on intro to skip immediately (once)
+  document.getElementById('intro').addEventListener('click', enterMenu, { once: true });
+  // Advance when video finishes; fallback timeout in case video fails to load
+  const introVideo = document.getElementById('introVideo');
+  introVideo.addEventListener('ended', enterMenu, { once: true });
+  setTimeout(enterMenu, 15000); // fallback
+
+  // Enter menu
+  function enterMenu() {
+    document.getElementById('intro').classList.add('hidden');
+    const menu = document.getElementById('menu');
+    menu.classList.add('visible');
+    setTimeout(initScrollAnimations, 100);
+    setTimeout(initImageModals, 100);
+  }
+
+  // Scroll animations
+  function initScrollAnimations() {
+    const cards = document.querySelectorAll('.item-card, .special-card');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('revealed'), i * 60);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    cards.forEach(c => observer.observe(c));
+  }
+
+  // Scroll listener — nav + scroll-top only
+  window.addEventListener('scroll', () => {
+    // Don't run while menu is still hidden (getBoundingClientRect returns 0 for hidden elements)
+    if (!document.getElementById('menu').classList.contains('visible')) return;
+
+    const scrollY = window.scrollY;
+
+    // Show scroll-to-top
+    const btn = document.getElementById('scrollTopBtn');
+    btn.classList.toggle('visible', scrollY > 300);
+
+    // Update active nav pill — match by section id, not array index
+    const sections = ['pancakes','cups','crepes','waffles','special'];
+    let current = sections[0];
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top < 120) current = id;
+    });
+    document.querySelectorAll('.cat-pill').forEach(pill => {
+      const target = pill.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+      pill.classList.toggle('active', target === current);
+    });
+  }, { passive: true });
+
+  // Scroll to section (named scrollToSection to avoid shadowing window.scrollTo)
+  function scrollToSection(id, pill) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+  }
+
+  // ── Instagram-style image reveal ──
+  function openImgModal(imgEl) {
+    const circle = document.getElementById('imgModalCircle');
+    const nameEl = document.getElementById('imgModalName');
+
+    // Clone content (emoji or real img) into modal circle
+    circle.style.background = imgEl.style.background || '';
+    if (imgEl.tagName === 'IMG') {
+      circle.innerHTML = `<img src="${imgEl.src}" alt="">`;
+    } else {
+      circle.innerHTML = imgEl.innerHTML;
+    }
+
+    // Grab item name from sibling .item-name
+    const card = imgEl.closest('.item-card');
+    const itemName = card ? card.querySelector('.item-name')?.textContent?.trim() : '';
+    nameEl.textContent = itemName || '';
+
+    document.getElementById('imgModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeImgModal() {
+    document.getElementById('imgModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeImgModal();
+  });
+
+  // Wire up all image placeholders and real images — runs after menu is revealed
+  function initImageModals() {
+    document.querySelectorAll('.item-img-placeholder, .item-img').forEach(el => {
+      el.addEventListener('click', e => {
+        e.stopPropagation();
+        openImgModal(el);
+      });
+    });
+  }
+</script>
+</body>
+</html>
